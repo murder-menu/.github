@@ -1,0 +1,24 @@
+name: Set Start Date on In Progress
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+
+jobs:
+  set-start-date:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check label
+        if: ${{ github.event.label.name == 'in progress' }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue_number = context.payload.issue.number;
+            const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+            const body = `**Start Date:** ${date}\n\n${context.payload.issue.body}`;
+            github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue_number,
+              body: body
+            });
